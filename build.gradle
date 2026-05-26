@@ -69,7 +69,7 @@ repositories {
 }
 
 dependencies {
-    implementation "maven.modrinth:treeliable:${treeliable_version}-neoforge"
+    implementation "maven.modrinth:treeliable:${treeliable_version}-1.21.1-neoforge"
 
     // Cloth Config
     api "me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}"

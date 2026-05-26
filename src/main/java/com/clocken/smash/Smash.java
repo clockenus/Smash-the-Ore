@@ -69,7 +69,7 @@ public class Smash
                 Map<Integer, List<Runnable>> layeredActions = new TreeMap<>();
 
                 int index = 0;
-                if (SmashConfig.get().smashBehavior == SmashConfig.SmashBehavior.BY_LAYER) {
+                if (SmashConfig.get().smashBehavior == SmashBehavior.BY_LAYER) {
                     for (List<BlockPos> positions : SmashUtil.getLayers(initialPos, agent, level)) {
 
                         index++;

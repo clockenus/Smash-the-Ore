@@ -1,5 +1,6 @@
 {
-  "itemGroup.smash": "Example Mod Tab",
-  "block.smash.example_block": "Example Block",
-  "item.smash.example_item": "Example Item"
+  "text.autoconfig.smash.title": "Treeliable: Smash the Ore",
+
+  "text.autoconfig.smash.option.enabled": "Enabled",
+  "text.autoconfig.smash.option.smashBehavior": "Smash behavior"
 }
