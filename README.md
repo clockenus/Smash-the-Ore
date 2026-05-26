@@ -8,4 +8,4 @@
 - [Cloth Config](https://modrinth.com/mod/cloth-config)
 ## Features
 - **Veinmining:** 3x3 blocks ore mining, that only works with pickaxes. *Can be set to break blocks by layers, or by blocks.*
-![hippo](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTlkbHA1N2M4azZ4dmk0OHY3cmpidHY2cm5vNTd2MXExbmlnZnN2ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/x8MV5aQynq1YGL6KkG/giphy.gif)
+![Smash showcase](https://raw.githubusercontent.com/clockenus/Smash-the-Ore/HEAD/media/smash.gif)
