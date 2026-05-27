@@ -98,6 +98,7 @@ public class SmashUtil {
             int index = 0;
             if (SmashConfig.get().smashBehavior == SmashBehavior.BY_LAYER) {
                 for (List<BlockPos> positions : SmashUtil.getLayers(initialPos, agent, level)) {
+                    if (positions.isEmpty()) continue;
 
                     index++;
                     layeredActions.put(
