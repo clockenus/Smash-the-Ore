@@ -3,19 +3,28 @@ package com.clocken.smash;
 import com.evandev.treeliable.client.Client;
 import com.evandev.treeliable.client.settings.ClientChopSettings;
 import com.evandev.treeliable.common.chop.ChopUtil;
+import com.evandev.treeliable.common.chop.FellQueue;
+import com.evandev.treeliable.common.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.Tags;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static com.clocken.smash.Smash.SmashCommon.HARVESTED_BLOCKS;
 
 public class SmashUtil {
 
@@ -80,5 +89,54 @@ public class SmashUtil {
             }
         }
         return positions;
+    }
+
+    public static void smash(ServerPlayer agent, ServerLevel level, BlockPos initialPos, BlockState blockState) {
+        if (SmashUtil.canSmashWithTool(agent, level, initialPos) && ChopUtil.playerWantsToChop(agent, Client.getChopSettings())) {
+            Map<Integer, List<Runnable>> layeredActions = new TreeMap<>();
+
+            int index = 0;
+            if (SmashConfig.get().smashBehavior == SmashBehavior.BY_LAYER) {
+                for (List<BlockPos> positions : SmashUtil.getLayers(initialPos, agent, level)) {
+
+                    index++;
+                    layeredActions.put(
+                            index,
+                            List.of(() -> {
+                                for (BlockPos pos : positions) {
+                                     HARVESTED_BLOCKS.add(pos);
+                                     agent.gameMode.destroyBlock(pos);
+                                     HARVESTED_BLOCKS.remove(pos);
+                                }
+                                level.levelEvent(2001, initialPos, Block.getId(blockState));
+                            })
+                    );
+                }
+            } else {
+                for(BlockPos pos : SmashUtil.getBlocksToBeSmashed(initialPos, agent, level)) {
+
+                    index++;
+                    layeredActions.put(
+                            index,
+                            List.of(() -> {
+                                HARVESTED_BLOCKS.add(pos);
+                                agent.gameMode.destroyBlock(pos);
+                                level.levelEvent(2001, pos, Block.getId(blockState));
+                                HARVESTED_BLOCKS.remove(pos);
+                            })
+                    );
+                }
+            }
+
+            if (ModConfig.get().delayFellingLayers) {
+                FellQueue.addTask(layeredActions, ModConfig.get().fellingLayerDelayTicks, ModConfig.get().exponentialFellingSpeedup);
+            } else {
+                for (List<Runnable> layer : layeredActions.values()) {
+                    for (Runnable action : layer) {
+                        action.run();
+                    }
+                }
+            }
+        }
     }
 }

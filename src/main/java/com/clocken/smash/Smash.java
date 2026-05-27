@@ -1,9 +1,5 @@
 package com.clocken.smash;
 
-import com.evandev.treeliable.client.Client;
-import com.evandev.treeliable.common.chop.ChopUtil;
-import com.evandev.treeliable.common.chop.FellQueue;
-import com.evandev.treeliable.common.config.ModConfig;
 import com.evandev.treeliable.server.NeoForgeServer;
 import com.mojang.logging.LogUtils;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -12,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -50,7 +45,7 @@ public class Smash
 
     @EventBusSubscriber(modid = Smash.MODID)
     public static class SmashCommon {
-        private static final Set<BlockPos> HARVESTED_BLOCKS = new HashSet<>();
+        public static final Set<BlockPos> HARVESTED_BLOCKS = new HashSet<>();
 
         @SubscribeEvent
         public static void onBreakEvent(BlockEvent.BreakEvent event) {
@@ -61,57 +56,11 @@ public class Smash
                 return;
             }
 
-            BlockPos initialPos = event.getPos();
-            BlockState state = level.getBlockState(initialPos);
-            if(HARVESTED_BLOCKS.contains(initialPos)) return;
+            BlockState blockState = event.getState();
+            BlockPos pos = event.getPos();
 
-            if (SmashUtil.canSmashWithTool(agent, level, initialPos) && ChopUtil.playerWantsToChop(agent, Client.getChopSettings())) {
-                Map<Integer, List<Runnable>> layeredActions = new TreeMap<>();
-
-                int index = 0;
-                if (SmashConfig.get().smashBehavior == SmashBehavior.BY_LAYER) {
-                    for (List<BlockPos> positions : SmashUtil.getLayers(initialPos, agent, level)) {
-
-                        index++;
-                        layeredActions.put(
-                                index,
-                                List.of(() -> {
-                                    for (BlockPos pos : positions) {
-                                        if (HARVESTED_BLOCKS.add(pos)) {
-                                            agent.gameMode.destroyBlock(pos);
-                                            HARVESTED_BLOCKS.remove(pos);
-                                        }
-                                    }
-                                    level.levelEvent(2001, initialPos, Block.getId(state));
-                                })
-                        );
-                    }
-                } else {
-                    for(BlockPos pos : SmashUtil.getBlocksToBeSmashed(initialPos, agent, level)) {
-
-                        index++;
-                        layeredActions.put(
-                                index,
-                                List.of(() -> {
-                                    HARVESTED_BLOCKS.add(pos);
-                                    agent.gameMode.destroyBlock(pos);
-                                    level.levelEvent(2001, pos, Block.getId(state));
-                                    HARVESTED_BLOCKS.remove(pos);
-                                })
-                        );
-                    }
-                }
-
-                if (ModConfig.get().delayFellingLayers) {
-                    FellQueue.addTask(layeredActions, ModConfig.get().fellingLayerDelayTicks, ModConfig.get().exponentialFellingSpeedup);
-                } else {
-                    for (List<Runnable> layer : layeredActions.values()) {
-                        for (Runnable action : layer) {
-                            action.run();
-                        }
-                    }
-                }
-            }
+            if(HARVESTED_BLOCKS.contains(pos)) return;
+            SmashUtil.smash(agent, level, pos, blockState);
         }
     }
 }
