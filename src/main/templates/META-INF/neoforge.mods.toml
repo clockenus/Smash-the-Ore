@@ -1,11 +1,14 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
+issueTrackerURL="https://github.com/clockenus/Smash-the-Ore/issues"
 
 [[mods]]
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
+displayURL="https://github.com/clockenus/Smash-the-Ore"
+logoFile="${mod_id}.png"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
